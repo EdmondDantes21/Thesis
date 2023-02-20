@@ -1,0 +1,96 @@
+\chapter{Experimental results}
+The objective of this validation is dual: on one hand it tries to show that the framework can be used and works as expected in a more solid simulator. Some attempts at this have already been made by the designers of the framework, however, an ad hoc environment which may not always agree with the conditions of a real world scenario was used. Contrariwise, Webots is a highly regarded 3D graphic robot simulator which should be satisfactory in this regard.
+\par
+On the other hand the objective was to show the better performance of the online approach in comparison to the offline planner in highly dynamic environments. This analysis has already been carried out by the developers of the ROS2-BDI architecture, therefore this extra analysis only serves as a way of strengthening that idea with some additional scenarios and different parameters.
+
+\section{Additional scenarios description}
+As a reminder, here are the four scenario tested;
+\begin{enumerate}
+    \item the basic situation consists in a $7$ by $7$ grid where objects appear in random positions and a robot tries to pick them up as effectively as possible and bring them to the bin.
+    \item Same as above with the addition of a new timer for each new object. If it goes off the object disappears and is no longer retrievable.
+    \item Same as above, furthermore a new robot whose task is uncorrelated to the e\_puck and moves around the map, sometimes blocking the path.
+    \item As previously, what's more the possibility to pick up as many objects as the robots wants. For all other simulations the robot could only carry up to one object at a time.
+\end{enumerate}
+
+\section{Results}
+Each configuration was run $30$ times, the result metrics are the average measures. Here is a quick explanation of the parameters:
+\begin{itemize}
+    \item \textbf{\texttt{SPAWN\_RATE}} is the time, in seconds, that passes between the apparition of each object.
+    \item \textbf{\texttt{LIFE\_SPAN}} is the timer, in seconds, after which the object disappears.
+    \item \textbf{\texttt{DUCK\_COUNT}} is the total amount of objects spawned during the simulation.
+    \item \textbf{\texttt{PLANNER}} indicates which planner (online/offline) was used.
+    \item \textbf{\texttt{miss\_rate}} is the rate of objects failed to retrieve in percentage. 
+    \item \textbf{\texttt{avg\_retrieve\_time}} is the average time, in seconds, the robot spent retrieving objects, from the moment they spawn to the moment they are brought to the bin.
+\end{itemize}
+Here are the results of the validation process for the scenario number $1$:
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+    \hline
+     \multicolumn{4}{|c|}{\textbf{Parameters}} & \multicolumn{2}{|c|}{\textbf{Results}} \\
+     \hline
+     \textbf{\texttt{SPAWN\_RATE}} & \textbf{\texttt{LIFE\_SPAN}} & \textbf{\texttt{DUCK\_COUNT}} & \textbf{\texttt{PLANNER}} & \textbf{\texttt{miss\_rate}} & \textbf{\texttt{avg\_retrieve\_time}} \\
+     \hline
+     foo & bar & foo & bar & foo & bar \\
+     bar & foo & bar & foo & bar & foo \\
+     foo & bar & foo & bar & foo & bar \\
+     bar & foo & bar & foo & bar & foo \\
+     foo & bar & foo & bar & foo & bar \\
+     \hline
+\end{tabular}
+\end{center}
+
+Here are the results of the validation process for the scenario number $2$:
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+    \hline
+     \multicolumn{4}{|c|}{\textbf{Parameters}} & \multicolumn{2}{|c|}{\textbf{Results}} \\
+     \hline
+     \textbf{\texttt{SPAWN\_RATE}} & \textbf{\texttt{LIFE\_SPAN}} & \textbf{\texttt{DUCK\_COUNT}} & \textbf{\texttt{PLANNER}} & \textbf{\texttt{miss\_rate}} & \textbf{\texttt{avg\_retrieve\_time}} \\
+     \hline
+     foo & bar & foo & bar & foo & bar \\
+     bar & foo & bar & foo & bar & foo \\
+     foo & bar & foo & bar & foo & bar \\
+     bar & foo & bar & foo & bar & foo \\
+     foo & bar & foo & bar & foo & bar \\
+     \hline
+\end{tabular}
+\end{center}
+
+Here are the results of the validation process for the scenario number $3$:
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+    \hline
+     \multicolumn{4}{|c|}{\textbf{Parameters}} & \multicolumn{2}{|c|}{\textbf{Results}} \\
+     \hline
+     \textbf{\texttt{SPAWN\_RATE}} & \textbf{\texttt{LIFE\_SPAN}} & \textbf{\texttt{DUCK\_COUNT}} & \textbf{\texttt{PLANNER}} & \textbf{\texttt{miss\_rate}} & \textbf{\texttt{avg\_retrieve\_time}} \\
+     \hline
+     foo & bar & foo & bar & foo & bar \\
+     bar & foo & bar & foo & bar & foo \\
+     foo & bar & foo & bar & foo & bar \\
+     bar & foo & bar & foo & bar & foo \\
+     foo & bar & foo & bar & foo & bar \\
+     \hline
+\end{tabular}
+\end{center}
+
+Here are the results of the validation process for the scenario number $4$:
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+    \hline
+     \multicolumn{4}{|c|}{\textbf{Parameters}} & \multicolumn{2}{|c|}{\textbf{Results}} \\
+     \hline
+     \textbf{\texttt{SPAWN\_RATE}} & \textbf{\texttt{LIFE\_SPAN}} & \textbf{\texttt{DUCK\_COUNT}} & \textbf{\texttt{PLANNER}} & \textbf{\texttt{miss\_rate}} & \textbf{\texttt{avg\_retrieve\_time}} \\
+     \hline
+     foo & bar & foo & bar & foo & bar \\
+     bar & foo & bar & foo & bar & foo \\
+     foo & bar & foo & bar & foo & bar \\
+     bar & foo & bar & foo & bar & foo \\
+     foo & bar & foo & bar & foo & bar \\
+     \hline
+\end{tabular}
+\end{center}
+
+\section{Remarks on the results}
+TODO
+
+\newpage

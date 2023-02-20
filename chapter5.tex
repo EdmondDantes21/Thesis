@@ -1,0 +1,68 @@
+\chapter{Flexibility evaluation} 
+The goal of this chapter is to show that once the initial set up is done, it is easy to adapt ROS2-BDI to virtually any new scenario. To be more specific, we will check whether the application follows well the principle of scalability and modularity by presenting some practical examples.
+\par 
+It is important to mention that the last two additions are to be considered speculative as they were not actually implemented, for the author decided to focus their time on different aspects of the project. However the speculation will, in all probability, be faithful to a possible real implementation. 
+\par
+As a reminder, the most basic situation consists in a $7$ by $7$ grid where objects appear in random positions and a robot tries to pick them up as effectively as possible and bring them to the bin. Now we shall look at the modifications needed to change the scenario, focusing mostly only on the ROS2-BDI architecture.
+
+\section{Adding a timer}
+Let us suppose that for whatever reason we must pick objects up before a timer runs out and we have already implemented the basic scenario. Here are the adjustments needed.
+
+\subsection{Reactive rule addition} Basically the only change needed on the ROS2-BDI side. We need to add a reactive rule that deletes the desire to retrieve an object if it were to be deleted. The implementation is shown in Listing 3.11 in chapter 3. This rule is triggered if the predicate \texttt{deleted} which is removed from the belief set by the supervisor using the \texttt{/del\_belief} topic.
+\par
+This hopefully gives an idea of the level of modularity of ROS2-BDI since all we had to do to adapt was adding another tiny module (the reactive rule) to our scenario. Although the change is minimal, the way the planner will operate will be drastically different. That is because in case the objects disappear often the number of plan abortions will increase significantly. The great thing about this though is that in spite of the growth in complexity of the plans, the work the programmer has to carry out is not far from the same, for ROS2-BDI will take care of every additional complication.
+
+\section{Adding an uncorrelated agent}
+On top of the timer a new agent moves around the map, sometimes blocking the planned path by the e\_puck.
+
+\subsection{Belief set management}
+The modifications here are simpler in comparison to the previous alteration. We have already defined a \texttt{walkable} predicate which we can use to infer that the tile the extra robot is currently occupying cannot be accessed. The belief addition and deletion is taken care of by the supervisor, which, using the \texttt{/add\_belief} and \texttt{/del\_belief} topics, tells ROS2-BDI that when a tile becomes accessible/inaccessible.
+
+\section{Multiple objects collection}
+Now we are going to see how to allow the robot to pick up as many objects as it wants.
+
+\subsection{PDDL domain alteration} 
+If we take a look a the \texttt{pickup} action we can see that among its preconditions there is a predicate \texttt{(at start (free ?r))} which means that the robot must be free before the action begins. If we want to allow the robot to pick up as many objects as it wants we could just remove this predicate from the set of precondition.
+\par
+If instead we want the robot to hold at most $n$ objects we could try using functions instead. This could be done by adding a function \texttt{(capacity ?r - robot)}. After this all that is left is to:
+\begin{itemize}
+    \item Initialize the new function to any value we want in the belief set.
+    \item Add the precondition \texttt{(at start (> capacity ?r) 0)} to the \texttt{pickup} action.
+    \item Add the effect \texttt{(at end (decrease (capacity ?r) 1))} to the \texttt{pickup} action.
+    \item Add the effect \texttt{(at end (increase (capacity ?r) 1))} to the \texttt{putdown} action.
+\end{itemize}
+Once again the complexity of the new solution is very low and the impact on the planner is of great importance. This is testament to the modularity of the architecture which allows for radical changes in the internal behavior of the system with very little effort.
+
+\section{Simulation layout modification} 
+Let us now suppose that the layout of the physical simulation changes, i.e. the map gets bigger or some objects (like robot, box or bin) change position. Obviously the simulation definition needs to change. The changes on ROS2-BDI are more interesting though.
+\par
+Whatever the change is the only thing that needs to be altered is the belief set initialization. For example if we want to make the map bigger we would just need to define more tiles, set them to \texttt{walkable} and instantiate adjacencies accordingly. If we wish to change the position of the robot, the bin or anything else, we just need to change the parameters of the \texttt{at} predicate by modifying the referenced tile.
+\par
+This effortless modification when upsizing the simulation's dimensions is a clear indication that the ROS2-BDI architecture is incontrovertibly scalar when it comes to this kind of remodeling.
+
+\section{Adding multiple agents}
+Since ROS2-BDI is a MAS (Multi agent system) it only makes sense that we look into the differences in set up when two or more agents populate the simulation. Ideally we would want the agents to cooperate, meaning that it should never happen that different robots try to retrieve the same object, for it would be a waste of time.
+There are countless ways to do achieve that, the following solution is just one of many possible implementations.
+\par
+Two new predicates \texttt{(is\_being\_retrieved ?g - garbage ?r - robot)} and \texttt{(booked ?g - garbage ?r - robot)} are added, the first specifies whether an agent has committed to pick that particular object up while the second one is its complement. Furthermore, a new action with duration equal to zero is added. Its goal is to manage the aforementioned predicates. Here is the implementation:
+\begin{lstlisting}
+    (:@durative-action@ book_garbage
+        :@parameters@ (?r - robot ?g - garbage)
+        :@duration@ (= ?duration 0)
+        :@condition@ (and 
+            (at start (is_not_being_retrieved ?g ?r))
+        )
+        :@effect@ (and 
+            (at end (not (is_not_being_retrieved ?g ?r)))
+            (at end (booked ?g ?r)
+        )
+    )
+\end{lstlisting}
+The reason behind the decision to use two complementary predicates is that PDDL 2.1 support for negative preconditions is poor for the time being.
+To complement this new addition we need to make sure that a plan is not outputted if an agent has not booked a piece of garbage. We can accomplish that by adding an auxiliary precondition to the \texttt{pickup} action. That is \texttt{(over all (booked ?g ?r))}.
+The reason behind the duration being equal to zero is that it is hoped the planner will put the action at the beginning of the plan, thus booking the piece of garbage immediately and disallowing other agents to reserve that object.
+\par
+More agents means more ROS2 nodes, therefore we need to include an additional one in the launcher of the project, which, as usual, will take care of the interconnections on its own.
+\par
+This expansion is by all means the most convoluted of all the extensions. However, it also greatly increases the proportion of the project. In light of this analysis we can conclude that ROS2-BDI is also quite easily scalable, seeing that it allows for the inclusion of multiple agent with a reasonably low level of effort.
+\newpage
